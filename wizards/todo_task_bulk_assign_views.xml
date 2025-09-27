@@ -1,0 +1,39 @@
+<odoo>
+    <!-- Wizard Form View -->
+    <record id="bulk_assign_wizard_view_form" model="ir.ui.view">
+        <field name="name">bulk.assign.wizard.form</field>
+        <field name="model">todo.task.bulk.assign.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="assign_to_id" required="1"/>
+                    <field name="note"/>
+                </group>
+                <footer>
+                    <button string="Assign Tasks" type="object" name="action_assign" class="btn-primary"/>
+                    <button string="Cancel" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Wizard Action Window -->
+    <record id="bulk_assign_wizard_action" model="ir.actions.act_window">
+        <field name="name">Bulk Assign</field>
+        <field name="res_model">todo.task.bulk.assign.wizard</field>
+        <field name="target">new</field>
+        <field name="view_mode">form</field>
+    </record>
+
+    <!-- Bind Wizard Action to todo.task -->
+    <record id="bulk_assign_wizard_action_server" model="ir.actions.server">
+        <field name="name">Bulk Assign</field>
+        <field name="model_id" ref="model_todo_task"/>
+        <field name="binding_model_id" ref="model_todo_task"/>
+        <field name="binding_type">action</field>
+        <field name="state">code</field>
+        <field name="code">
+            action = env.ref('todo_app.bulk_assign_wizard_action').read()[0]
+        </field>
+    </record>
+</odoo>

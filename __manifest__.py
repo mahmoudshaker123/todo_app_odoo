@@ -13,6 +13,7 @@
         'data/sequence.xml',
         'views/base_menu.xml',
         'views/todo_task_view.xml',
+        'wizards/todo_task_bulk_assign_views.xml',
         'reports/todo_task_report.xml',
 
 ],
