@@ -1,0 +1,14 @@
+<odoo>
+    <data>
+        <record id="due_date_reminder_email_cron" model="ir.cron">
+                    <field name="name">Todo Task: Due Date Reminder</field>
+                    <field name="model_id" ref="model_todo_task"/>
+                    <field name="state">code</field>
+                    <field name="code">model.send_due_date_reminder_email()</field>
+                    <field name="interval_number">1</field>
+                    <field name="interval_type">days</field>
+                    <field name="numbercall">-1</field>
+                    <field name="active">True</field>
+                </record>
+    </data>
+</odoo>

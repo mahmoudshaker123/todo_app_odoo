@@ -1,5 +1,7 @@
 from odoo import fields , models , api
 from odoo.exceptions import ValidationError
+from datetime import date
+
 
 
 class TodoTask(models.Model):
@@ -8,6 +10,7 @@ class TodoTask(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
     name =fields.Char('Task Name')
+    ref = fields.Char(string="Reference", default="New", readonly=True, copy=False)
     due_date = fields.Date()
     description = fields.Text()
     assign_to_id = fields.Many2one('res.partner')
@@ -22,6 +25,8 @@ class TodoTask(models.Model):
     estimated_time = fields.Float(string='Estimated Time (Hours)')
     timesheet_ids = fields.One2many('todo.task.line','task_id' , string='Timesheets')
     active = fields.Boolean(default=True)
+    reminder_email = fields.Char(string="Reminder Email")
+
 
     def actions_in_progress(self):
         for rec in self:
@@ -39,6 +44,13 @@ class TodoTask(models.Model):
         for rec in self:
             rec.state='completed'
 
+    @api.model
+    def create(self, vals):
+        res = super(TodoTask, self).create(vals)
+        if res.ref == 'New':
+            res.ref = self.env['ir.sequence'].next_by_code('task_seq')
+        return res
+
     @api.constrains('timesheet_ids', 'estimated_time')
     def _check_timesheet_total(self):
         for rec in self:
@@ -47,6 +59,45 @@ class TodoTask(models.Model):
                 raise ValidationError(
                     f"Total time ({total}h) exceeds estimated time ({rec.estimated_time}h) for task {rec.name}."
                 )
+
+
+    # Cron
+
+    def send_due_date_reminder_email(self):
+        today = date.today()
+        overdue_tasks = self.search([
+            ('due_date','<',today),
+            ('state','in',['new','in_progress'])
+        ])
+        for task in overdue_tasks:
+            if not task.reminder_email:
+                continue
+
+            subject = f"⚠️ Task Overdue Reminder: {task.name}"
+            body_html = f"""
+                            <div style="font-family:Arial, sans-serif; color:#333; line-height:1.6;">
+                                <h3 style="color:#e74c3c;">⚠️ تذكير: المهمة متأخرة</h3> 
+                                <p>مرحبًا,</p>
+                                <p>المهمة <b>{task.name}</b> تأخرت حيث كان تاريخ الاستحقاق: <b>{task.due_date}</b>.</p>
+                                <p>الحالة الحالية: <b>{task.state}</b></p>
+
+                                <hr style="margin:20px 0;"/>
+
+                                <h3 style="color:#2980b9;">⚠️ Overdue Task Reminder</h3>
+                                <p>Hello,</p>
+                                <p>The task <b>{task.name}</b> is overdue since <b>{task.due_date}</b>.</p>
+                                <p>Current state: <b>{task.state}</b></p>
+
+                                <p style="margin-top:20px;">Thanks,<br/><b>Task Management System</b></p>
+                            </div>
+                        """
+
+            self.env['mail.mail'].create({
+                'subject': subject,
+                'body_html': body_html,
+                'email_to': task.reminder_email,
+            }).send()
+
 
 
 

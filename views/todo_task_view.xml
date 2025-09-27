@@ -4,7 +4,8 @@
         <field name="name">todo task tree</field>
         <field name="model">todo.task</field>
         <field name="arch" type="xml">
-            <tree>
+            <tree string="Tasks" decoration-danger="due_date &lt; current_date and state in ('new','in_progress')">
+                <field name="ref"/>
                 <field name="name"/>
                 <field name="due_date"/>
                 <field name="assign_to_id"/>
@@ -39,19 +40,21 @@
                 <sheet>
 
                     <div class="oe_title">
-                        <label for="name"/>
+                        <label for="ref"/>
                         <h1>
-                            <field name="name"/>
+                            <field name="ref"/>
                         </h1>
 
                     </div>
                     <group>
                         <group>
+                            <field name="name"/>
                             <field name="due_date"/>
                             <field name="estimated_time"/>
                         </group>
                         <group>
                             <field name="assign_to_id"/>
+                            <field name="reminder_email"/>
                         </group>
                     </group>
                         <group>
@@ -62,6 +65,7 @@
                             <page string="Time Sheet">
                                 <field name="timesheet_ids" readonly="state == 'closed'">
                                     <tree editable="bottom">
+                                         <field name="date" readonly="1"/>
                                          <field name="description"/>
                                          <field name="time_spent"/>
                                     </tree>

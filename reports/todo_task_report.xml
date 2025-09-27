@@ -1,0 +1,149 @@
+<odoo>
+    <record id="todo_task_record" model="ir.actions.report">
+        <field name="name">Todo Task Report</field>
+        <field name="model">todo.task</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="binding_model_id" ref="model_todo_task"/>
+        <field name="binding_type">report</field>
+        <field name="report_name">todo_app.todo_task_report_template</field>
+    </record>
+
+    <template id="todo_task_report_template">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+
+                <style type="text/css">
+                    .task-box {
+                        border: 2px solid #000;
+                        padding: 20px;
+                        font-size: 16px;
+                        background: #fff;
+                        border-radius: 8px;
+                        margin-bottom: 40px; /* مسافة بين التاسكات */
+                    }
+                    .task-box .label {
+                        font-weight: bold;
+                        display: inline-block;
+                        width: 160px;
+                    }
+                    .task-box .value {
+                        margin-left: 25px;
+                    }
+                    .section-title {
+                        font-weight: bold;
+                        margin-top: 20px;
+                        margin-bottom: 12px;
+                        display: block;
+                        font-size: 17px;
+                        text-decoration: underline;
+                    }
+                    .timesheet-box {
+                        border: 2px solid #000;
+                        padding: 15px;
+                        margin-top: 30px;
+                        border-radius: 8px;
+                    }
+                    table.timesheet {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin-top: 10px;
+                        font-size: 15px;
+                    }
+                    table.timesheet th, table.timesheet td {
+                        border: 1px solid #000;
+                        padding: 8px;
+                        text-align: center;
+                    }
+                    table.timesheet th {
+                        background: #f0f0f0;
+                        font-weight: bold;
+                    }
+                    .timesheet-title {
+                        text-align: center;
+                        font-size: 16px;
+                        font-weight: bold;
+                        padding: 8px;
+                        background: #eaeaea;
+                        border: 1px solid #000;
+                        margin-bottom: 10px;
+                    }
+                    .total-row td {
+                        font-weight: bold;
+                        text-align: right;
+                    }
+                    /* خط فاصل بين التاسكات */
+                    .task-separator {
+                        border-top: 3px dashed #444;
+                        margin: 40px 0;
+                    }
+                </style>
+
+                <t t-foreach="docs" t-as="o">
+                    <div class="task-box">
+                        <div>
+                            <span class="label">TASK:</span>
+                            <span class="value"><t t-esc="o.name"/></span>
+                        </div>
+                        <div>
+                            <span class="label">Due Date:</span>
+                            <span class="value"><t t-esc="o.due_date"/></span>
+                        </div>
+                        <div>
+                            <span class="label">Assign To:</span>
+                            <span class="value"><t t-esc="o.assign_to_id.name"/></span>
+                        </div>
+                        <div>
+                            <span class="label">Estimated Time:</span>
+                            <span class="value"><t t-esc="o.estimated_time"/> H</span>
+                        </div>
+
+                        <div class="section-title">Description:</div>
+                        <div>
+                            <t t-esc="o.description"/>
+                        </div>
+
+                        <!-- Timesheet Box -->
+                        <div class="timesheet-box">
+                            <div class="timesheet-title">Timesheet</div>
+                            <table class="timesheet">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Date</th>
+                                        <th>Description</th>
+                                        <th>Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-set="counter" t-value="1"/>
+                                    <t t-foreach="o.timesheet_ids" t-as="line">
+                                        <tr>
+                                            <td><t t-esc="counter"/></td>
+                                            <td><t t-esc="line.date"/></td>
+                                            <td><t t-esc="line.description"/></td>
+                                            <td><t t-esc="line.time_spent"/> H</td>
+                                        </tr>
+                                        <t t-set="counter" t-value="counter + 1"/>
+                                    </t>
+                                    <tr class="total-row">
+                                        <td colspan="3">Total Time</td>
+                                        <td><t t-esc="sum(line.time_spent for line in o.timesheet_ids)"/> H</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- فاصل بين التاسكات -->
+                    <div class="task-separator"></div>
+                </t>
+
+                <!-- Footer للترقيم -->
+                <div class="footer">
+                    <span>Page <span class="page"/> of <span class="topage"/></span>
+                </div>
+
+            </t>
+        </t>
+    </template>
+</odoo>
