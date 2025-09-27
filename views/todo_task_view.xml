@@ -42,28 +42,28 @@
                     <div class="oe_title">
                         <label for="ref"/>
                         <h1>
-                            <field name="ref"/>
+                            <field name="ref" readonly="state in ('closed','completed')"/>
                         </h1>
 
                     </div>
                     <group>
                         <group>
-                            <field name="name"/>
-                            <field name="due_date"/>
-                            <field name="estimated_time"/>
+                            <field name="name" readonly="state in ('closed','completed')"/>
+                            <field name="due_date" readonly="state in ('closed','completed')"/>
+                            <field name="estimated_time" readonly="state in ('closed','completed')"/>
                         </group>
                         <group>
-                            <field name="assign_to_id"/>
-                            <field name="reminder_email"/>
+                            <field name="assign_to_id" readonly="state in ('closed','completed')"/>
+                            <field name="reminder_email" readonly="state in ('closed','completed')"/>
                         </group>
                     </group>
                         <group>
-                              <field name="description" required="1"/>
+                              <field name="description" required="1" readonly="state in ('closed','completed')"/>
                         </group>
 
                     <notebook>
                             <page string="Time Sheet">
-                                <field name="timesheet_ids" readonly="state == 'closed'">
+                                <field name="timesheet_ids" readonly="state in ('closed','completed')">
                                     <tree editable="bottom">
                                          <field name="date" readonly="1"/>
                                          <field name="description"/>

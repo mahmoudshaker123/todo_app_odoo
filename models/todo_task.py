@@ -1,4 +1,4 @@
-from odoo import fields , models , api
+from odoo import fields , models , api , _
 from odoo.exceptions import ValidationError
 from datetime import date
 
@@ -13,7 +13,7 @@ class TodoTask(models.Model):
     ref = fields.Char(string="Reference", default="New", readonly=True, copy=False)
     due_date = fields.Date()
     description = fields.Text()
-    assign_to_id = fields.Many2one('res.partner')
+    assign_to_id = fields.Many2one('res.users')
     state = fields.Selection([
         ('new','New'),
         ('in_progress','In Progress'),
@@ -60,6 +60,18 @@ class TodoTask(models.Model):
                     f"Total time ({total}h) exceeds estimated time ({rec.estimated_time}h) for task {rec.name}."
                 )
 
+    def write(self, vals):
+        user = self.env.user
+
+        # لو في تغيير على الـ state
+        if 'state' in vals and vals['state'] == 'completed':
+            if user.has_group('todo_app.group_todo_task_user'):
+                for task in self:
+                    if task.state != 'in_progress':
+                        raise ValidationError(
+                            _("You can only move a task from 'In Progress' to 'Completed'.")
+                        )
+        return super(TodoTask, self).write(vals)
 
     # Cron
 

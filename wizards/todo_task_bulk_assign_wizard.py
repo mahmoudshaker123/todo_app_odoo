@@ -1,10 +1,11 @@
 from odoo import api, fields, models, _
+from odoo.exceptions import ValidationError
 
 
 class TodoTaskBulkAssignWizard(models.TransientModel):
     _name = 'todo.task.bulk.assign.wizard'
 
-    assign_to_id = fields.Many2one('res.partner', string='Assign To', required=True)
+    assign_to_id = fields.Many2one('res.users', string='Assign To', required=True)
     note = fields.Text(string='Optional Note')
 
 
@@ -17,6 +18,13 @@ class TodoTaskBulkAssignWizard(models.TransientModel):
         if not tasks:
             return {'type': 'ir.actions.act_window_close'}
 
-        tasks.write({'assign_to_id': self.assign_to_id.id})
+        invalid_tasks = tasks.filtered(lambda t: t.state not in ['new', 'in_progress'])
+        if invalid_tasks:
+            raise ValidationError(_(
+                "You can only assign tasks in 'New' or 'In Progress' state.\n"
+                "Invalid tasks: %s"
+            ) % ", ".join(invalid_tasks.mapped("name")))
 
+        # تحديث المهام المسموح بها فقط
+        tasks.write({'assign_to_id': self.assign_to_id.id})
 
